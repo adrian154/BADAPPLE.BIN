@@ -1,0 +1,2 @@
+nasm -f bin BADAPPLE.ASM -o BOOTSECTOR
+cat BOOTSECTOR video.bin > BADAPPLE
