@@ -2,7 +2,7 @@
 const fs = require("fs");
 const data = fs.readFileSync("resources/font.ppm").subarray(0x0f);
 
-const brightnesses = [0, 0, 0, 0, 0, 0, 0, 170, 85, 0, 0, 0, 0, 0, 0, 255,];
+const brightnesses = [0, 0, 0, 0, 0, 0, 0, 170, 85, 0, 0, 0, 0, 0, 0, 255];
 const combos = [];
 
 for(let glyph = 1; glyph < 256; glyph++) {
@@ -45,13 +45,14 @@ for(let color = 0; color < 256; color++) {
     bestCombos[color] = best[0];
 }
 
-const FRAMES = 6757;
-const video = Buffer.alloc(FRAMES * 4096);
+const frameCount = fs.readdirSync("resources/frames").filter(name => name.match(/\d+\.ppm/)).length;
+const video = Buffer.alloc(frameCount * 4096);
 
-for(let i = 0; i < FRAMES; i++) {
+for(let i = 0; i < frameCount; i++) {
     const frame = fs.readFileSync(`resources/frames/${i + 1}.ppm`).subarray(0x0d);
     console.log(i);
     for(let idx = 0; idx < 2000; idx++) {
+        const color = Math.floor((frame[idx*3] + frame[idx*3+1] + frame[idx*3+2])/3);
         const combo = bestCombos[frame[idx * 3]];
         video[idx * 2 + i * 4096] = combo & 0xff;
         video[idx * 2 + i * 4096 + 1] = combo >> 8;
