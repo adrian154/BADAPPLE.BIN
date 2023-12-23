@@ -31,19 +31,31 @@ for(let glyph = 1; glyph < 256; glyph++) {
 
 }
 
+const map = {};
+for(const [combo, value] of combos) {
+    if(map[value]) {
+        map[value].push(combo);
+    } else {
+        map[value] = [combo];
+    }
+}
+
 const bestCombos = new Array(256);
-for(let color = 0; color < 256; color++) {
-    let min = Infinity,
-        best = null;
-    for(const combo of combos) {
-        const diff = Math.abs(combo[1] - color);
+for(let i = 0; i < 256; i++) {
+    let min = Infinity, best = null;
+    for(const key in map) {
+        const diff = Math.abs(key - i);
         if(diff < min) {
             min = diff;
-            best = combo;
+            best = map[key];
         }
     }
-    bestCombos[color] = best[0];
+    bestCombos[i] = best;
 }
+
+console.log(bestCombos);
+
+const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 
 const frameCount = fs.readdirSync("resources/frames").filter(name => name.match(/\d+\.ppm/)).length;
 const video = Buffer.alloc(frameCount * 4096);
@@ -53,7 +65,7 @@ for(let i = 0; i < frameCount; i++) {
     console.log(i);
     for(let idx = 0; idx < 2000; idx++) {
         const color = Math.floor((frame[idx*3] + frame[idx*3+1] + frame[idx*3+2])/3);
-        const combo = bestCombos[frame[idx * 3]];
+        const combo = pick(bestCombos[color]);
         video[idx * 2 + i * 4096] = combo & 0xff;
         video[idx * 2 + i * 4096 + 1] = combo >> 8;
     }
